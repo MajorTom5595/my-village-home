@@ -4,17 +4,21 @@ import { useTheme } from '../ThemeContext';
 
 type ToggleState = boolean[];
 
+interface LocationState {
+  loginId: string;
+  accountName: string;
+}
+
 const Dashboard: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loginId, accountName } = location.state as { loginId: string; accountName: string };
   const { theme, toggleTheme } = useTheme();
 
+  // Use type assertion for location.state
+  const { loginId, accountName } = location.state as LocationState;
+
   const [timer, setTimer] = useState<number>(0);
-  const [toggles, setToggles] = useState<ToggleState>(() => {
-    const savedToggles = localStorage.getItem('toggleStates');
-    return savedToggles ? JSON.parse(savedToggles) : [false, false, false];
-  });
+  const [toggles, setToggles] = useState<ToggleState>([false, false, false]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [serverMessage, setServerMessage] = useState('');
 
@@ -27,25 +31,46 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('toggleStates', JSON.stringify(toggles));
-  }, [toggles]);
+    // Fetch initial toggle states from server
+    fetch(`/api/toggles/${loginId}`)
+      .then(response => response.json())
+      .then(data => setToggles(data))
+      .catch(error => console.error('Error fetching toggles:', error));
 
-  useEffect(() => {
     // Fetch message from server
     fetch('/api/hello')
       .then(response => response.json())
       .then(data => setServerMessage(data.message))
       .catch(error => console.error('Error:', error));
-  }, []);
+
+    // Set up polling to check for updates every 5 seconds
+    const pollInterval = setInterval(() => {
+      fetch(`/api/toggles/${loginId}`)
+        .then(response => response.json())
+        .then(data => setToggles(data))
+        .catch(error => console.error('Error polling toggles:', error));
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [loginId]);
 
   const handleLogout = () => {
     navigate('/');
   };
 
   const handleToggle = (index: number) => {
-    setToggles((prevToggles: ToggleState) => 
-      prevToggles.map((toggle, i) => i === index ? !toggle : toggle)
-    );
+    const newToggles = toggles.map((toggle, i) => i === index ? !toggle : toggle);
+    setToggles(newToggles);
+
+    // Update server with new toggle states
+    fetch(`/api/toggles/${loginId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ toggles: newToggles }),
+    })
+      .catch(error => console.error('Error updating toggles:', error));
   };
 
   const formatTime = (time: number): string => {
