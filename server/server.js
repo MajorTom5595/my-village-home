@@ -1,15 +1,8 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import User from './models/User.mjs';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 const app = express();
 
@@ -22,7 +15,7 @@ app.use(express.static(path.join(__dirname, '../build')));
 // Parse JSON bodies
 app.use(express.json());
 
-// MongoDB connection (as before)
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -34,6 +27,9 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error('MongoDB URI:', process.env.MONGODB_URI);
 });
 
+// Import the User model
+const User = require('./models/User');
+
 // API routes
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from the server!' });
@@ -41,12 +37,45 @@ app.get('/api/hello', (req, res) => {
 
 // Get toggle states
 app.get('/api/toggles/:userId', async (req, res) => {
-  // ... (as before)
+  try {
+    console.log('Fetching toggles for user:', req.params.userId);
+    const { userId } = req.params;
+    let user = await User.findOne({ loginId: userId });
+    
+    if (!user) {
+      console.log('User not found, creating new user');
+      user = new User({ loginId: userId });
+      await user.save();
+    }
+    
+    console.log('Sending toggles:', user.toggles);
+    res.json(user.toggles);
+  } catch (error) {
+    console.error('Error fetching toggles:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
 });
 
 // Update toggle states
 app.post('/api/toggles/:userId', async (req, res) => {
-  // ... (as before)
+  try {
+    const { userId } = req.params;
+    const { toggles } = req.body;
+    
+    let user = await User.findOne({ loginId: userId });
+    
+    if (!user) {
+      user = new User({ loginId: userId, toggles });
+    } else {
+      user.toggles = toggles;
+    }
+    
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating toggles:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // The "catchall" handler: for any request that doesn't
