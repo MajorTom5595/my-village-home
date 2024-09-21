@@ -13,11 +13,20 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// MongoDB connection with improved error handling and logging
+// Enable CORS for all routes
+app.use(cors());
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../build')));
+
+// Parse JSON bodies
+app.use(express.json());
+
+// MongoDB connection (as before)
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 30000 // Increase timeout to 30 seconds
+  serverSelectionTimeoutMS: 30000
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch((err) => {
@@ -25,11 +34,26 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error('MongoDB URI:', process.env.MONGODB_URI);
 });
 
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err);
+// API routes
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'Hello from the server!' });
 });
 
-// Rest of your server code...
+// Get toggle states
+app.get('/api/toggles/:userId', async (req, res) => {
+  // ... (as before)
+});
+
+// Update toggle states
+app.post('/api/toggles/:userId', async (req, res) => {
+  // ... (as before)
+});
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../build/index.html'));
+});
 
 const port = process.env.PORT || 10000;
 app.listen(port, () => {

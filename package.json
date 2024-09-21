@@ -35,7 +35,8 @@
     "eject": "react-scripts eject",
     "server": "node server/server.js",
     "dev": "concurrently \"npm run server\" \"npm start\"",
-    "render-postbuild": "npm install && npm run build"
+    "render-postbuild": "npm install && npm run build",
+    "postbuild": "mv client/build ."
   },
   "eslintConfig": {
     "extends": [
