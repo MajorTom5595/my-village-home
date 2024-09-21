@@ -30,12 +30,13 @@
   
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node server/server.js",
     "build": "react-scripts build",
+    "dev": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server/server.js",
-    "dev": "concurrently \"npm run server\" \"npm start\"",
+  
     "render-postbuild": "npm install && npm run build"
   },
   "eslintConfig": {
