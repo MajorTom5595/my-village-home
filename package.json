@@ -27,16 +27,16 @@
     "tailwindcss": "^3.4.12",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
+  
   },
   "scripts": {
-    "start": "node server/server.js",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server/server.js",
     "dev": "concurrently \"npm run server\" \"npm start\"",
-    "render-postbuild": "npm install && npm run build",
-    "postbuild": "mv client/build ."
+    "render-postbuild": "npm install && npm run build"
   },
   "eslintConfig": {
     "extends": [
