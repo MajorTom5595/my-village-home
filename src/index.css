@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --shopify-slate: #212b36;
+  --shopify-navy: #1e2d7d;
+  --shopify-light-gray: #f4f6f8;
+  --shopify-green: #008060;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-100;
+}
+
+.shopify-container {
+  @apply flex flex-col h-screen bg-gray-100 md:flex-row;
+}
+
+.shopify-sidebar {
+  @apply w-full bg-white shadow-md md:w-64 md:flex-shrink-0;
+}
+
+.shopify-main {
+  @apply flex-1 overflow-x-hidden overflow-y-auto bg-gray-100;
+}
+
+.shopify-header {
+  @apply bg-white shadow-sm;
+}
+
+.shopify-content {
+  @apply container mx-auto px-4 py-8;
+}
